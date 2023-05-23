@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
@@ -7,106 +7,86 @@ import { Container } from './App.styled';
 import * as ImageService from '../services/image-api';
 import Modal from './Modal/Modal';
 
-class App extends Component {
-  state = {
-    query: '',
-    page: 1,
-    pictures: [],
-    isLoading: false,
-    error: false,
-    totalPictures: 0,
-    showModal: false,
-    selectedPictureId: null,
-  };
+const App = () => {
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [pictures, setPictures] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [totalPictures, setTotalPictures] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedPictureId, setSelectedPicturesId] = useState(null);
 
-  async componentDidUpdate(_, prevState) {
-    const { query, page } = this.state;
-
-    if (prevState.query !== query || prevState.page !== page) {
+  useEffect(() => {
+    if (!query) {
+      return;
+    }
+    const fetchData = async () => {
       try {
-        this.setState({ isLoading: true, error: '' });
+        setIsLoading(true);
+        setError('');
+
         const data = await ImageService.fetchImage(query, page);
 
         const pictures = data.hits.map(
-          ({ id, webformatURL, tags, largeImageURL }) => {
-            return {
-              id,
-              webformatURL,
-              tags,
-              largeImageURL,
-            };
-          }
+          ({ id, webformatURL, tags, largeImageURL }) => ({
+            id,
+            webformatURL,
+            tags,
+            largeImageURL,
+          })
         );
 
-        this.setState(prevState => {
-          return {
-            pictures: [...prevState.pictures, ...pictures],
-            totalPictures: data.totalHits,
-          };
-        });
+        setPictures(prevPictures => [...prevPictures, ...pictures]);
+        setTotalPictures(data.totalHits);
       } catch (error) {
-        this.setState({ error: 'Something went wrong' });
+        setError('Something went wrong');
       } finally {
-        this.setState({ isLoading: false });
+        setIsLoading(false);
       }
-    }
-  }
+    };
 
-  formSubmitHandler = searchForm => {
-    this.setState({
-      query: searchForm,
-      pictures: [],
-      page: 1,
-      totalPictures: 0,
-    });
+    fetchData();
+  }, [query, page]);
+
+  const formSubmitHandler = searchForm => {
+    setQuery(searchForm);
+    setPictures([]);
+    setPage(1);
+    setTotalPictures(0);
   };
 
-  incrementPage = () => {
-    this.setState(prevState => {
-      return { page: prevState.page + 1 };
-    });
+  const incrementPage = () => {
+    setPage(prevState => prevState + 1);
   };
 
-  toggleModal = pictureId => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-      selectedPictureId: pictureId,
-    }));
+  const toggleModal = pictureId => {
+    setShowModal(!showModal);
+    setSelectedPicturesId(pictureId);
   };
 
-  render() {
-    const {
-      pictures,
-      error,
-      totalPictures,
-      isLoading,
-      showModal,
-      selectedPictureId,
-    } = this.state;
+  const showButton = pictures.length !== totalPictures && !isLoading;
 
-    const showButton = pictures.length !== totalPictures && !isLoading;
-
-    return (
-      <>
-        <Container>
-          <Searchbar onSubmit={this.formSubmitHandler} />
-          {pictures.length > 0 && (
-            <ImageGallery data={pictures} onClick={this.toggleModal} />
-          )}
-          {error && <p>{error}</p>}
-          {isLoading && <Loader />}
-          {showButton && <Button onClick={this.incrementPage} />}
-          {showModal && (
-            <Modal
-              data={pictures}
-              selectedPictureId={selectedPictureId}
-              onClick={this.toggleModal}
-            />
-          )}
-        </Container>
-      </>
-    );
-  }
-}
+  return (
+    <>
+      <Container>
+        <Searchbar onSubmit={formSubmitHandler} />
+        {pictures.length > 0 && (
+          <ImageGallery data={pictures} onClick={toggleModal} />
+        )}
+        {error && <p>{error}</p>}
+        {isLoading && <Loader />}
+        {showButton && <Button onClick={incrementPage} />}
+        {showModal && (
+          <Modal
+            data={pictures}
+            selectedPictureId={selectedPictureId}
+            onClick={toggleModal}
+          />
+        )}
+      </Container>
+    </>
+  );
+};
 
 export default App;
