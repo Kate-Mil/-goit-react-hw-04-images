@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   SearchBar,
@@ -8,49 +8,43 @@ import {
   SearchFormInput,
 } from './Searchbar.styled';
 
-class Searchbar extends Component {
-  state = {
-    searchForm: '',
+export default function Searchbar({ onSubmit }) {
+  const [searchForm, setSearchForm] = useState('');
+
+  const hendleSerchFormChange = e => {
+    setSearchForm(e.currentTarget.value.toLowerCase().trim());
   };
 
-  hendleSerchFormChange = e => {
-    this.setState({ searchForm: e.currentTarget.value.toLowerCase().trim() });
-  };
-
-  hendleSubmit = e => {
-    const { searchForm } = this.state;
+  const hendleSubmit = e => {
     e.preventDefault();
 
     if (searchForm.trim() === '') {
       alert('Please enter, what exactly you want to find?');
       return;
     }
-    this.props.onSubmit(searchForm);
-    this.setState({ searchForm: '' });
+    onSubmit(searchForm);
+    setSearchForm('');
   };
 
-  render() {
-    return (
-      <SearchBar>
-        <SearchForm onSubmit={this.hendleSubmit}>
-          <SearchFormButton type="submit">
-            <SearchFormButtonLabel>Search</SearchFormButtonLabel>
-          </SearchFormButton>
+  return (
+    <SearchBar>
+      <SearchForm onSubmit={hendleSubmit}>
+        <SearchFormButton type="submit">
+          <SearchFormButtonLabel>Search</SearchFormButtonLabel>
+        </SearchFormButton>
 
-          <SearchFormInput
-            type="text"
-            autocomplete="off"
-            autoFocus
-            placeholder="Search images and photos"
-            value={this.state.searchForm}
-            onChange={this.hendleSerchFormChange}
-          />
-        </SearchForm>
-      </SearchBar>
-    );
-  }
+        <SearchFormInput
+          type="text"
+          autocomplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+          value={searchForm}
+          onChange={hendleSerchFormChange}
+        />
+      </SearchForm>
+    </SearchBar>
+  );
 }
-export default Searchbar;
 
 Searchbar.propTypes = {
   onSubmit: PropTypes.func.isRequired,
