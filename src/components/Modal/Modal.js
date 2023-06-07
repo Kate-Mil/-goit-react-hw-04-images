@@ -4,7 +4,7 @@ import { Overlay, ModalContent } from './Modal.styled';
 
 const modalRoot = document.querySelector('#modal-root');
 
-const Modal = ({ data, selectedPictureId, onClick }) => {
+const Modal = ({ modalData, onClick }) => {
   useEffect(() => {
     const hendleKeyDown = e => {
       if (e.code === 'Escape') {
@@ -24,15 +24,7 @@ const Modal = ({ data, selectedPictureId, onClick }) => {
     }
   };
 
-  const selectedPicture = data.find(
-    picture => picture.id === selectedPictureId
-  );
-
-  if (!selectedPicture) {
-    return;
-  } // Ранняя проверка, если выбранная картинка не найдена
-
-  const { largeImageURL, tags } = selectedPicture;
+  const { largeImageURL, tags } = modalData;
 
   return createPortal(
     <Overlay onClick={hendleOverlayClick}>

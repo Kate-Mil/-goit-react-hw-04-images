@@ -5,12 +5,12 @@ import PropTypes from 'prop-types';
 export default function ImageGallery({ data, onClick }) {
   return (
     <Gallery>
-      {data.map(({ id, webformatURL, tags }) => (
+      {data.map(({ id, webformatURL, tags, largeImageURL }) => (
         <ImageGalleryItem
           key={id}
           url={webformatURL}
           alt={tags}
-          onClick={() => onClick(id)}
+          onClick={() => onClick({ largeImageURL, tags })}
         />
       ))}
     </Gallery>

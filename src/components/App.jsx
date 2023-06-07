@@ -15,7 +15,7 @@ const App = () => {
   const [error, setError] = useState(false);
   const [totalPictures, setTotalPictures] = useState(0);
   const [showModal, setShowModal] = useState(false);
-  const [selectedPictureId, setSelectedPicturesId] = useState(null);
+  const [modalData, setModalData] = useState(null);
 
   useEffect(() => {
     if (!query) {
@@ -60,9 +60,9 @@ const App = () => {
     setPage(prevState => prevState + 1);
   };
 
-  const toggleModal = pictureId => {
+  const toggleModal = modalData => {
     setShowModal(!showModal);
-    setSelectedPicturesId(pictureId);
+    setModalData(modalData);
   };
 
   const showButton = pictures.length !== totalPictures && !isLoading;
@@ -77,13 +77,7 @@ const App = () => {
         {error && <p>{error}</p>}
         {isLoading && <Loader />}
         {showButton && <Button onClick={incrementPage} />}
-        {showModal && (
-          <Modal
-            data={pictures}
-            selectedPictureId={selectedPictureId}
-            onClick={toggleModal}
-          />
-        )}
+        {showModal && <Modal modalData={modalData} onClick={toggleModal} />}
       </Container>
     </>
   );
